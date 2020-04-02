@@ -19,7 +19,7 @@
 const logger = new (require(global.PATH.mainDir + '/modules/logger'))("TestPlugin");
 const path = require('path');
 
-const PROTOCOL_PREFIX = 'mongo';
+const PROTOCOL_PREFIX = 'mongodb';
 
 module.exports = function register(blockchain, config, storj) {
     logger.info('Initialize mongo DB');

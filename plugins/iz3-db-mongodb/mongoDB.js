@@ -16,32 +16,61 @@
  limitations under the License.
  */
 
-const mongo = require('mongodb').MongoClient;
-const fs = require('fs-extra');
-
+const MongoClient = require('mongodb').MongoClient;
 
 class MongoDB {
-    constructor(name, workdir) {
-        this.workDir = workdir;
-        this.name = name;
-        //this.levelup = levelup(leveldown(this.workDir + '/' + name));
+    constructor(server, user, passwd, dbName) {
+        //this.workDir = workdir;
+        //this.name = name;
 
+        user = encodeURIComponent(user);
+        passwd = encodeURIComponent(passwd);
+        let authMechanism = 'DEFAULT';
+
+
+        let url = PROTOCOL_PREFIX+'://${user}:${passwd}@server/dbName?authMechanism=%s';
+        console.log(url);
+
+        /*
+        let url = f(
+            PROTOCOL_PREFIX+'://%s:%s@server/dbName?authMechanism=%s',
+            user,
+            passwd,
+            server,
+            dbName,
+            authMechanism
+        );
+        */
+
+        MongoClient.connect(url, function(err, db) {
+            /*
+            if (err) {
+                console.log('Connection error: ', err);
+                throw err;
+            }
+            */
+            assert.equal(null, err);
+            console.log("Connected correctly to server MongoDB");
+
+            this.db = db;
+        });
     }
 
-    /*
-    get(key, options, callback) {
+    createCollection(name, options, callback) {
+        this.db.createCollection(name, options,function(err, results) {
 
-        this.levelup.get(key, options, function (err, result) {
-            if(err) {
-                return callback(err);
-            }
 
-            if(result.toString().includes('JSON:')) {
-                result = JSON.parse(result.toString().replace('JSON:', ''));
-            }
+            console.log(err);
+            console.log(results);
+            throw(" --- ");
 
-            return callback('', result);
+
+            this.db.close();
+            callback(err, results);
         });
+    }
+
+    delCollection(key, value, options, callback) {
 
     }
 
@@ -59,6 +88,23 @@ class MongoDB {
         });
     }
 
+    get(key, options, callback) {
+
+        this.levelup.get(key, options, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+
+            if (result.toString().includes('JSON:')) {
+                result = JSON.parse(result.toString().replace('JSON:', ''));
+            }
+
+            return callback('', result);
+        });
+
+    }
+
+    /*
     del(key, options, callback) {
         this.levelup.del(key, options, callback);
     }
@@ -92,6 +138,6 @@ class MongoDB {
     */
 }
 
-exports.init = (name, workdir) => {
-    return new MongoDB(name, workdir);
+exports.init = (server, user, passwd, dbName) => {
+    return new MongoDB(server, user, passwd, dbName);
 };

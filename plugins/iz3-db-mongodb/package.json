@@ -4,6 +4,7 @@
   "description": "iz3node plugin for mongoDB",
   "main": "index.js",
   "dependencies": {
+    "mongodb": "^3.5.5"
   },
   "homepage": "https://izzz.io",
   "author": "",
