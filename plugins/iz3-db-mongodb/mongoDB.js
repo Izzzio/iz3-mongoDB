@@ -16,33 +16,20 @@
  limitations under the License.
  */
 
+const assert = require('assert-plus');
 const MongoClient = require('mongodb').MongoClient;
 
 class MongoDB {
-    constructor(server, user, passwd, dbName) {
+    constructor(protocol, server, user, passwd, dbName) {
         //this.workDir = workdir;
         //this.name = name;
 
         user = encodeURIComponent(user);
         passwd = encodeURIComponent(passwd);
         let authMechanism = 'DEFAULT';
+        let url = `${protocol}://${user}:${passwd}@${server}/${dbName}?authMechanism=${authMechanism}`;
 
-
-        let url = PROTOCOL_PREFIX+'://${user}:${passwd}@server/dbName?authMechanism=%s';
-        console.log(url);
-
-        /*
-        let url = f(
-            PROTOCOL_PREFIX+'://%s:%s@server/dbName?authMechanism=%s',
-            user,
-            passwd,
-            server,
-            dbName,
-            authMechanism
-        );
-        */
-
-        MongoClient.connect(url, function(err, db) {
+        MongoClient.connect(url, function (err, db) {
             /*
             if (err) {
                 console.log('Connection error: ', err);
@@ -57,7 +44,7 @@ class MongoDB {
     }
 
     createCollection(name, options, callback) {
-        this.db.createCollection(name, options,function(err, results) {
+        this.db.createCollection(name, options, function (err, results) {
 
 
             console.log(err);
@@ -76,12 +63,12 @@ class MongoDB {
 
     put(key, value, options, callback) {
 
-        if(typeof value === 'object') {
+        if (typeof value === 'object') {
             value = 'JSON:' + JSON.stringify(value);
         }
 
         this.levelup.put(key, value, function (err,) {
-            if(callback) {
+            if (callback) {
                 callback(err);
             }
 
@@ -138,6 +125,6 @@ class MongoDB {
     */
 }
 
-exports.init = (server, user, passwd, dbName) => {
-    return new MongoDB(server, user, passwd, dbName);
+exports.init = (protocol, server, user, passwd, dbName) => {
+    return new MongoDB(protocol, server, user, passwd, dbName);
 };
