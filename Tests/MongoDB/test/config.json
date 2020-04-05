@@ -27,8 +27,8 @@
   "workDir": "./temp",
   "walletFile": "./temp/wallet.json",
   "walletsDB": "mem://wallets.json",
-  "blocksDB": "mongodb://blocksByPlugin",
-  "accountsDB": "mongodb://accountByPlugin",
+  "blocksDB": "mongodb://dbUser:dbPass@localhost:27017/blocksByPlugin?authMechanism=SCRAM-SHA-256",
+  "accountsDB": "mongodb://dbUser:dbPass@localhost:27017/accountByPlugin?authMechanism=SCRAM-SHA-256",
   "appEntry": "./Tests/MongoDB/test/test.js",
   "ecmaContract": {
     "enabled": true,

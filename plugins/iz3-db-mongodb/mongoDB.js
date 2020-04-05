@@ -16,46 +16,36 @@
  limitations under the License.
  */
 
-const assert = require('assert-plus');
 const MongoClient = require('mongodb').MongoClient;
 
 class MongoDB {
-    constructor(protocol, server, user, passwd, dbName) {
-        //this.workDir = workdir;
-        //this.name = name;
+    constructor(connectionString, workDir) {
+        this.workDir = workDir;
 
-        user = encodeURIComponent(user);
-        passwd = encodeURIComponent(passwd);
-        let authMechanism = 'DEFAULT';
-        let url = `${protocol}://${user}:${passwd}@${server}/${dbName}?authMechanism=${authMechanism}`;
+        MongoClient.connect(
+            'mongodb://' + connectionString,
+            {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+            },
+            function (err, db) {
+                if (err) {
+                    console.log('Connection error: ', err);
+                }
 
-        MongoClient.connect(url, function (err, db) {
-            /*
-            if (err) {
-                console.log('Connection error: ', err);
-                throw err;
-            }
-            */
-            assert.equal(null, err);
-            console.log("Connected correctly to server MongoDB");
-
-            this.db = db;
-        });
+                console.log("Connected correctly to server MongoDB");
+                this.db = db;
+            });
     }
 
+    /*
     createCollection(name, options, callback) {
         this.db.createCollection(name, options, function (err, results) {
-
-
-            console.log(err);
-            console.log(results);
-            throw(" --- ");
-
-
             this.db.close();
             callback(err, results);
         });
     }
+    */
 
     delCollection(key, value, options, callback) {
 
@@ -125,6 +115,6 @@ class MongoDB {
     */
 }
 
-exports.init = (protocol, server, user, passwd, dbName) => {
-    return new MongoDB(protocol, server, user, passwd, dbName);
+exports.init = (connectionString, workDir) => {
+    return new MongoDB(connectionString, workDir);
 };
