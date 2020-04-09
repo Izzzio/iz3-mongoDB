@@ -20,65 +20,59 @@ const MongoClient = require('mongodb').MongoClient;
 
 class MongoDB {
     constructor(connectionString, workDir) {
+        this.connectionString = 'mongodb://' + connectionString;
         this.workDir = workDir;
-
-        MongoClient.connect(
-            'mongodb://' + connectionString,
-            {
-                useNewUrlParser: true,
-                useUnifiedTopology: true
-            },
-            function (err, db) {
-                if (err) {
-                    console.log('Connection error: ', err);
-                }
-
-                console.log("Connected correctly to server MongoDB");
-                this.db = db;
-            });
+        this._initialized = false;
+        this.db = '';
     }
 
-    /*
-    createCollection(name, options, callback) {
-        this.db.createCollection(name, options, function (err, results) {
-            this.db.close();
-            callback(err, results);
+    _init() {
+        let self = this;
+        return new Promise((resolve, reject) => {
+            MongoClient.connect(
+                this.connectionString,
+                {
+                    useNewUrlParser: true,
+                    useUnifiedTopology: true
+                },
+                (err, db) => {
+                    if (err) {
+                        console.log('Connection error: ', err);
+                        reject(err);
+                    } else {
+                        console.log("Connected correctly to server MongoDB");
+                        self.db = db;
+                        resolve();
+                    }
+                });
         });
     }
-    */
 
-    delCollection(key, value, options, callback) {
-
-    }
-
-    put(key, value, options, callback) {
-
-        if (typeof value === 'object') {
-            value = 'JSON:' + JSON.stringify(value);
+    async put(key, value, options, callback) {
+        if (!this._initialized) {
+            this._initialized = true;
+            await this._init();
         }
 
-        this.levelup.put(key, value, function (err,) {
+        this.db.main.insert({[key]: value}, (err, result) => {
             if (callback) {
                 callback(err);
             }
-
         });
     }
 
-    get(key, options, callback) {
+    async get(key, options, callback) {
+        if (!this._initialized) {
+            this._initialized = true;
+            await this._init();
+        }
 
-        this.levelup.get(key, options, function (err, result) {
+        this.db.main.find({[key]: {$exists: true}}, (err, result) => {
             if (err) {
                 return callback(err);
             }
-
-            if (result.toString().includes('JSON:')) {
-                result = JSON.parse(result.toString().replace('JSON:', ''));
-            }
-
             return callback('', result);
         });
-
     }
 
     /*
