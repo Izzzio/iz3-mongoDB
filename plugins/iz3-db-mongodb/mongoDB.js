@@ -17,6 +17,9 @@
  */
 
 const MongoClient = require('mongodb').MongoClient;
+const logger = new (require(global.PATH.mainDir + '/modules/logger'))("MongoDB");
+
+const collectionName = 'main';
 
 class MongoDB {
     constructor(connectionString, workDir) {
@@ -35,13 +38,13 @@ class MongoDB {
                     useNewUrlParser: true,
                     useUnifiedTopology: true
                 },
-                (err, db) => {
+                (err, client) => {
                     if (err) {
-                        console.log('Connection error: ', err);
-                        reject(err);
+                        logger.fatalFall('Connection error: '+ err);
                     } else {
-                        console.log("Connected correctly to server MongoDB");
-                        self.db = db;
+                        logger.info('Connected correctly to DB');
+                        this._initialized = true;
+                        self.db = client.db("accountByPlugin");
                         resolve();
                     }
                 });
@@ -50,11 +53,9 @@ class MongoDB {
 
     async put(key, value, options, callback) {
         if (!this._initialized) {
-            this._initialized = true;
             await this._init();
         }
-
-        this.db.main.insert({[key]: value}, (err, result) => {
+        await this.db.collection(collectionName).insertOne({[key]: value}, (err, result) => {
             if (callback) {
                 callback(err);
             }
@@ -63,11 +64,9 @@ class MongoDB {
 
     async get(key, options, callback) {
         if (!this._initialized) {
-            this._initialized = true;
             await this._init();
         }
-
-        this.db.main.find({[key]: {$exists: true}}, (err, result) => {
+        this.db.collection(collectionName).find({[key]: {$exists: true}}, (err, result) => {
             if (err) {
                 return callback(err);
             }
