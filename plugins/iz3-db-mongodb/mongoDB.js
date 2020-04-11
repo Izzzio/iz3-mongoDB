@@ -26,11 +26,15 @@ class MongoDB {
         this.connectionString = 'mongodb://' + connectionString;
         this.workDir = workDir;
         this._initialized = false;
-        this.db = '';
+        this.client = '';
+        this.dbName = '';
     }
 
     _init() {
         let self = this;
+        let connectParams = this.connectionString.split("/");
+        this.dbName = connectParams[connectParams.length - 1];
+
         return new Promise((resolve, reject) => {
             MongoClient.connect(
                 this.connectionString,
@@ -40,11 +44,11 @@ class MongoDB {
                 },
                 (err, client) => {
                     if (err) {
-                        logger.fatalFall('Connection error: '+ err);
+                        logger.fatalFall('Connection error: ' + err);
                     } else {
-                        logger.info('Connected correctly to DB');
+                        logger.info('Connected correctly to DB ' + this.dbName);
                         this._initialized = true;
-                        self.db = client.db("accountByPlugin");
+                        self.client = client;
                         resolve();
                     }
                 });
@@ -55,22 +59,34 @@ class MongoDB {
         if (!this._initialized) {
             await this._init();
         }
-        await this.db.collection(collectionName).insertOne({[key]: value}, (err, result) => {
-            if (callback) {
-                callback(err);
-            }
-        });
+
+        console.log('PUT to ' + this.dbName + ' key = ' + key);
+
+        await this.client
+            .db(this.dbName)
+            .collection(collectionName)
+            .insertOne({[key]: value}, (err, result) => {
+                if (callback) {
+                    callback(err);
+                }
+            });
     }
 
     async get(key, options, callback) {
         if (!this._initialized) {
             await this._init();
         }
-        this.db.collection(collectionName).find({[key]: {$exists: true}}, (err, result) => {
-            if (err) {
-                return callback(err);
-            }
-            return callback('', result);
+
+        console.log('GET from ' + this.dbName + ' key = ' + key);
+
+        this.client
+            .db(this.dbName)
+            .collection(collectionName)
+            .find({[key]: {$exists: true}}).toArray((err, result) => {
+                if (err) {
+                    return callback(err);
+                }
+                return callback('', result);
         });
     }
 
