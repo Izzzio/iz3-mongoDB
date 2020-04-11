@@ -60,7 +60,7 @@ class MongoDB {
             await this._init();
         }
 
-        console.log('PUT to ' + this.dbName + ' key = ' + key);
+        //console.log('PUT to ' + this.dbName + ' key = ' + key);
 
         await this.client
             .db(this.dbName)
@@ -77,17 +77,23 @@ class MongoDB {
             await this._init();
         }
 
-        console.log('GET from ' + this.dbName + ' key = ' + key);
+        //console.log('GET from ' + this.dbName + ' key = ' + key);
 
-        this.client
+        await this.client
             .db(this.dbName)
             .collection(collectionName)
             .find({[key]: {$exists: true}}).toArray((err, result) => {
+                if (0 == key && !result.length) {
+                    err = true;
+                }
+                
                 if (err) {
                     return callback(err);
                 }
+
+                result = result[0][key];
                 return callback('', result);
-        });
+            });
     }
 
     /*
