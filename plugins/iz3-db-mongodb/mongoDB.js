@@ -31,7 +31,7 @@ class MongoDB {
     }
 
     _init() {
-        let self = this;
+        let that = this;
         let connectParams = this.connectionString.split("/");
         this.dbName = connectParams[connectParams.length - 1];
 
@@ -48,7 +48,7 @@ class MongoDB {
                     } else {
                         logger.info('Connected correctly to DB ' + this.dbName);
                         this._initialized = true;
-                        self.client = client;
+                        that.client = client;
                         resolve();
                     }
                 });
@@ -86,7 +86,7 @@ class MongoDB {
                 if (0 == key && !result.length) {
                     err = true;
                 }
-                
+
                 if (err) {
                     return callback(err);
                 }
@@ -96,32 +96,45 @@ class MongoDB {
             });
     }
 
-    /*
-    del(key, options, callback) {
-        this.levelup.del(key, options, callback);
+    async del(key, options, callback) {
+        if (!this._initialized) {
+            await this._init();
+        }
+
+        this.client
+            .db(this.dbName)
+            .collection(collectionName)
+            .deleteMany({[key]: {$exists: true}}).toArray((err, result) => {
+            if (err || !result.ok) {
+                logger.warning('Delete from DB execution went with error. Key = ' + key);
+            }
+            callback();
+        });
     }
 
-    close(callback) {
-        this.levelup.close(callback);
+    async close(callback) {
+        await this.client.close(callback);
     }
 
-    clear(callback) {
-        let that = this;
-        try {
-            this.levelup.close(function () {
-                fs.removeSync(that.workDir + '/' + that.name);
-                that.levelup = levelup(leveldown(that.workDir + '/' + that.name));
-                if(typeof callback !== 'undefined') {
+    async clear(callback) {
+        if (!this._initialized) {
+            await this._init();
+        }
+
+        await this.client
+            .db(this.dbName)
+            .collection(collectionName)
+            .drop({}, (err, result) => {
+                if (err) {
+                    logger.warning('DB not cleared: ' + err);
+                }
+                if (typeof callback !== 'undefined') {
                     callback();
                 }
             });
-        } catch (e) {
-            if(typeof callback !== 'undefined') {
-                callback();
-            }
-        }
     }
 
+    /*
     save(callback) {
         if(typeof callback !== 'undefined') {
             callback();
