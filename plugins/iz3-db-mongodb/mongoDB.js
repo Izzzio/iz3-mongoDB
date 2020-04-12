@@ -134,13 +134,11 @@ class MongoDB {
             });
     }
 
-    /*
     save(callback) {
-        if(typeof callback !== 'undefined') {
+        if (typeof callback !== 'undefined') {
             callback();
         }
     }
-    */
 }
 
 exports.init = (connectionString, workDir) => {
