@@ -59,13 +59,10 @@ class MongoDB {
         if (!this._initialized) {
             await this._init();
         }
-
-        //console.log('PUT to ' + this.dbName + ' key = ' + key);
-
         await this.client
             .db(this.dbName)
             .collection(collectionName)
-            .insertOne({[key]: value}, (err, result) => {
+            .insertOne({[key]: value}, {}, (err, result) => {
                 if (callback) {
                     callback(err);
                 }
@@ -77,23 +74,21 @@ class MongoDB {
             await this._init();
         }
 
-        //console.log('GET from ' + this.dbName + ' key = ' + key);
-
-        await this.client
+        this.client
             .db(this.dbName)
             .collection(collectionName)
             .find({[key]: {$exists: true}}).toArray((err, result) => {
-                if (0 == key && !result.length) {
-                    err = true;
-                }
+            if (!result.length) {
+                err = true;
+            }
 
-                if (err) {
-                    return callback(err);
-                }
+            if (err) {
+                return callback(err);
+            }
 
-                result = result[0][key];
-                return callback('', result);
-            });
+            result = result[0][key];
+            return callback('', result);
+        });
     }
 
     async del(key, options, callback) {
@@ -104,12 +99,12 @@ class MongoDB {
         this.client
             .db(this.dbName)
             .collection(collectionName)
-            .deleteMany({[key]: {$exists: true}}).toArray((err, result) => {
-            if (err || !result.ok) {
-                logger.warning('Delete from DB execution went with error. Key = ' + key);
-            }
-            callback();
-        });
+            .deleteMany({[key]: {$exists: true}}, {}, (err, result) => {
+                if (err || !result.result.ok) {
+                    logger.warning('Delete from DB execution went with error. Key = ' + key + '. Error: ' + err);
+                }
+                callback();
+            });
     }
 
     async close(callback) {
@@ -121,15 +116,41 @@ class MongoDB {
             await this._init();
         }
 
-        await this.client
+        this.client
             .db(this.dbName)
             .collection(collectionName)
-            .drop({}, (err, result) => {
+            .drop({},(err, result) => {
+
+
+                console.log(err);
+                console.log(result);
+
+
+                // Ensure we don't have the collection in the set of names
+                this.client.db.listCollections().toArray(function(err, replies) {
+
+                    var found = false;
+                    // For each collection in the list of collection names in this db look for the
+                    // dropped collection
+                    replies.forEach(function (document) {
+                        if (document.name == "main") {
+                            found = true;
+                            return;
+                        }
+                    });
+
+                    // Ensure the collection is not found
+                    console.log('FOUND: '+found);
+                });
+
+
+
                 if (err) {
                     logger.warning('DB not cleared: ' + err);
                 }
                 if (typeof callback !== 'undefined') {
-                    callback();
+                    //callback();
+                    callback(err, result);
                 }
             });
     }
