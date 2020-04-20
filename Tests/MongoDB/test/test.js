@@ -75,7 +75,13 @@ class App extends DApp {
      */
     async run() {
         let resDel = await that.testDeleteRow();
-        let resClear = await that.testClearDB();
+        //let resClear = await that.testClearDB();
+
+
+
+        storj.get('blocks').db.clear(() => {
+            console.log('RESOLVE');
+        });
 
 
         console.log('');
@@ -89,7 +95,7 @@ class App extends DApp {
         return new Promise((resolve, reject) => {
             try {
                 storj.get('blocks').db.del(1, {}, () => {
-                    //if exist console message, then del executed with error
+                    //if exist console message, then 'del' executed with error
                     resolve(true);
                 });
 
@@ -102,19 +108,26 @@ class App extends DApp {
     testClearDB() {
         return new Promise((resolve, reject) => {
             try {
-                storj.get('blocks').db.clear((err, result) => {
+                storj.get('blocks').db.clear(() => {
                     //if exist console message, then clear executed with error
-                    //resolve(true);
 
+                    console.log('RESOLVE');
 
+                    resolve(true);
+
+                    /*
                     if (err) {
                         reject(err);
                     }
                     resolve(result);
+                    */
 
 
                 });
             } catch (e) {
+
+                console.log('REJECT');
+
                 reject(e);
             }
         });

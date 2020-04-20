@@ -78,7 +78,8 @@ class MongoDB {
             .db(this.dbName)
             .collection(collectionName)
             .find({[key]: {$exists: true}}).toArray((err, result) => {
-            if (!result.length) {
+
+            if (!result || !result.length) {
                 err = true;
             }
 
@@ -112,18 +113,27 @@ class MongoDB {
     }
 
     async clear(callback) {
+
+
+        console.log("111");
+
+
         if (!this._initialized) {
             await this._init();
         }
 
+
+        console.log("222");
+
+
         this.client
             .db(this.dbName)
             .collection(collectionName)
-            .drop({},(err, result) => {
+            .deleteMany({},{}, (err, result) => {
 
 
-                console.log(err);
-                console.log(result);
+                console.log('ERROR = '+err);
+                console.log('RESULT = '+result);
 
 
                 // Ensure we don't have the collection in the set of names
@@ -153,6 +163,9 @@ class MongoDB {
                     callback(err, result);
                 }
             });
+
+        console.log('AFTER--------------------');
+
     }
 
     save(callback) {
