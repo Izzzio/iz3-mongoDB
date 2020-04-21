@@ -332,7 +332,7 @@ class KeyValue {
                 }
                 break;
             case STORAGE_TYPE.PLUGINDB:
-                that.pluginDB.close(callback);
+                that.pluginDB.clear(callback);
         }
     }
 

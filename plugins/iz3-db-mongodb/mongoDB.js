@@ -108,64 +108,28 @@ class MongoDB {
             });
     }
 
-    async close(callback) {
-        await this.client.close(callback);
-    }
-
     async clear(callback) {
-
-
-        console.log("111");
-
-
         if (!this._initialized) {
             await this._init();
         }
 
-
-        console.log("222");
-
-
         this.client
             .db(this.dbName)
             .collection(collectionName)
-            .deleteMany({},{}, (err, result) => {
-
-
-                console.log('ERROR = '+err);
-                console.log('RESULT = '+result);
-
-
-                // Ensure we don't have the collection in the set of names
-                this.client.db.listCollections().toArray(function(err, replies) {
-
-                    var found = false;
-                    // For each collection in the list of collection names in this db look for the
-                    // dropped collection
-                    replies.forEach(function (document) {
-                        if (document.name == "main") {
-                            found = true;
-                            return;
-                        }
-                    });
-
-                    // Ensure the collection is not found
-                    console.log('FOUND: '+found);
-                });
-
-
-
+            .drop({}, (err, result) => {
                 if (err) {
                     logger.warning('DB not cleared: ' + err);
                 }
+
                 if (typeof callback !== 'undefined') {
                     //callback();
                     callback(err, result);
                 }
             });
+    }
 
-        console.log('AFTER--------------------');
-
+    close(callback) {
+        this.client.close(callback);
     }
 
     save(callback) {

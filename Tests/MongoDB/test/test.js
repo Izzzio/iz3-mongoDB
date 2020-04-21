@@ -75,14 +75,20 @@ class App extends DApp {
      */
     async run() {
         let resDel = await that.testDeleteRow();
-        //let resClear = await that.testClearDB();
+        let resClear = await that.testClearDB();
 
-
-
-        storj.get('blocks').db.clear(() => {
-            console.log('RESOLVE');
-        });
-
+        await (function () {
+            return new Promise((resolve, reject) => {
+                try {
+                    storj.get('blocks').db.close(() => {
+                        logger.info('Connection successfull closed');
+                        resolve(true);
+                    });
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        })();
 
         console.log('');
         console.log('');
@@ -108,26 +114,13 @@ class App extends DApp {
     testClearDB() {
         return new Promise((resolve, reject) => {
             try {
-                storj.get('blocks').db.clear(() => {
-                    //if exist console message, then clear executed with error
-
-                    console.log('RESOLVE');
-
-                    resolve(true);
-
-                    /*
+                storj.get('blocks').db.clear((err, result) => {
                     if (err) {
                         reject(err);
                     }
                     resolve(result);
-                    */
-
-
                 });
             } catch (e) {
-
-                console.log('REJECT');
-
                 reject(e);
             }
         });
@@ -135,47 +128,3 @@ class App extends DApp {
 }
 
 module.exports = App;
-
-
-/*
-await (function () {
-    return new Promise(function (resolve) {
-        try {
-            that._eventHandler[handle][a].handler(contract, event, args, function () {
-                resolve();
-            });
-        } catch (e) {
-            logger.error('Contract event handler failed: ' + contract + ' ' + event + ' ' + e);
-            resolve();
-        }
-    });
-})();
-*/
-
-
-/*
-that.contracts.ecmaContract.db.db.getAsync('0', (e, r) => {
-    console.log("2");
-    console.log(e);
-    console.log(r);
-});
-*/
-
-//console.log(storj.get('blocks').db);
-//storj.get('accountManager').get()
-
-/*
-storj.get('blocks').getAccount('default', (e, r) => {
-    console.log(e);
-    console.log(r);
-});
-*/
-
-/*
-//that.db.del('default');
-that.ecmaContract.db.del('default');
-that.contracts.ecmaContract.db.del('default', (err, result) => {
-    console.log(err);
-    console.log(result);
-});
-*/
