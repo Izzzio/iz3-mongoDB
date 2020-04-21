@@ -6,9 +6,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        mongodb-version: [4.0, 4.2]
 
     steps:
       - uses: actions/checkout@v1
@@ -16,15 +13,19 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '10.x'
-          
-      - name: Start MongoDB
-      - uses: getong/mongo-action@v1.1
+         
+      - name: Setup mongodb with password
+        uses: getong/mongo-action@v1.1
         with:
+          # Version of mongo to use
           mongo version: '4.2-bionic'
+          # The port of host
           host port: 27017
+          # The username of the mongo
           mongo username: 'dbUser'
+          # The password of the mongo
           mongo password: 'dbPass'
-
+          
       - name: Run npm install
         run: npm install
       - name: Run Test
