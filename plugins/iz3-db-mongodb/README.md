@@ -1,4 +1,0 @@
-# MongoDB
-MongoDB database plugin
-
-
