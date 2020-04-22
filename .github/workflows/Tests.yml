@@ -20,7 +20,7 @@ jobs:
           # Version of mongo to use
           mongo version: '4.2-bionic'
           # The port of host
-          host port: 27017
+          host port: 'localhost:27017'
           # The username of the mongo
           mongo username: 'dbUser'
           # The password of the mongo
