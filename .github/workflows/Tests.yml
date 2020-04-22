@@ -29,8 +29,5 @@ jobs:
       - name: Run npm install
         run: npm install
         
-      - name: Load module 'mongodb'
-        run: npm install mongodb
-        
       - name: Run Test
         run: npm run test
