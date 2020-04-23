@@ -27,8 +27,8 @@
   "workDir": "./temp",
   "walletFile": "./temp/wallet.json",
   "walletsDB": "mem://wallets.json",
-  "blocksDB": "mongodb://dbUser:dbPass@localhost:27017/blocksByPlugin",
-  "accountsDB": "mongodb://dbUser:dbPass@localhost:27017/accountByPlugin",
+  "blocksDB": "mongodb://localhost:27017/blocksByPlugin",
+  "accountsDB": "mongodb://localhost:27017/accountByPlugin",
   "appEntry": "./Tests/MongoDB/test/test.js",
   "ecmaContract": {
     "enabled": true,
