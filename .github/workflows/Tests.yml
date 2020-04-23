@@ -6,26 +6,24 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [10.x]
+        mongodb-version: [4.0, 4.2]
 
     steps:
       - uses: actions/checkout@v1
-      - name: Setup Node
+      - name: Setup Node ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
-          node-version: '10.x'
+          node-version: ${{ matrix.node-version }}
          
-      - name: Setup mongodb with password
-        uses: getong/mongo-action@v1.1
+      - name: Setup and start MongoDB
+        uses: supercharge/mongodb-github-action@1.3.0
         with:
-          # Version of mongo to use
-          mongo version: '4.2-bionic'
-          # The port of host
-          host port: 27017
-          # The username of the mongo
-          mongo username: 'dbUser'
-          # The password of the mongo
-          mongo password: 'dbPass'
-          
+          # MongoDB version to use (default "latest")
+          mongodb-version: ${{ matrix.mongodb-version }}
+
       - name: Run npm install
         run: npm install
         
